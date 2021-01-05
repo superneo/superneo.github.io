@@ -3,4 +3,4 @@
 ## model architecture
 
 ### encoder-decoder paring in brief
-![the transformer - model architecture](images/transformer/fig_01.png?raw=true "original paper figure 1")
+<img src="../images/transformer/fig_01.png" alt="original paper figure 1" width="300"/>
