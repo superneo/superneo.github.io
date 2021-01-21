@@ -1,10 +1,7 @@
 # paper summary: [Attention Is All You Need](https://arxiv.org/pdf/1706.03762.pdf)
 
-## Disclaimer
-This is a simple coverage for the transformer paper.<br>
-It'd be a brief and subjective summary of the original,<br>
-with a bit of my own perspective,<br>
-not a kind of line-by-line commentary or analysis.<br>
+#### Disclaimer
+- it's a brief and rough summary for the original paper
 
 ## model architecture
 
@@ -61,3 +58,39 @@ not a kind of line-by-line commentary or analysis.<br>
   - self-attention layer has a constant number of sequential operations as conv layer or restricted self-attention layer do while recurrent layer does the worst
 - maximum path length
   - a single self-attention layer simply connects all positions to each other which no other layer type can do
+
+## training 
+- training data and batching
+  - WMT 2014 English-German
+    - 4.5 million sentence pairs
+    - shared source/target vocab of about 37000 tokens with BPE
+  - WMT 2014 English-French
+    - 36 million sentence pairs
+    - shared source/target vocab of about 32000 tokens with word-piece
+  - sentence-pair batching of approximate sequence length
+    - a set of sentence pairs with approximately 25000 source/target tokens respectively
+- hardware and schedule
+  - one machine with 8 P100 GPUs
+  - base model
+    - training step time: 0.4 seconds
+    - training for 100000 steps (12 hours)
+  - big model
+    - training step time: 1.0 seconds
+    - training for 300000 steps (3.5 days)
+- optimizer
+  - Adam optimizer with beta1 = 0.9, beta2 = 0.98, epsilon = 10^-9
+  - learning rate varying over the course of training with warmup_steps = 4000:
+<img src="../images/transformer/learning_rate.png" alt="original paper formula" width="600"/>
+
+- regularization
+  - residual dropout
+    - dropout applied in the encoder/decoder stacks to:
+      - multi-head attention output before 'Add & Norm'
+      - FFN output before 'Add & Norm'
+      - input/output embeddings + positional encodings
+    - dropout probability for the base model: 0.1
+  - label smoothing
+    - epsilon = 0.1
+    - performance: accuracy(+), BLUE(+), perplexity(-)
+## results
+- refer to the original paper
