@@ -91,6 +91,6 @@
     - dropout probability for the base model: 0.1
   - label smoothing
     - epsilon = 0.1
-    - performance: accuracy(+), BLUE(+), perplexity(-)
+    - performance: better for accuracy and BLUE while worse for perplexity
 ## results
 - refer to the original paper
