@@ -1,9 +1,11 @@
-# paper summary: [Attention Is All You Need](https://arxiv.org/pdf/1706.03762.pdf)
+# Paper Summary: [Attention Is All You Need](https://arxiv.org/pdf/1706.03762.pdf)
 
-#### Disclaimer
-- it's a brief and rough summary for the original paper
+## Background
+- inefficient computation to relate 2 arbitrary positions in input/output sequences using RNN/CNN
+- self-attention to deal with this problem successfully in multiple tasks
+- the 1st purely self-attention architecture to compute input/output representations without RNN/CNN
 
-## model architecture
+## Model Architecture
 
 ### encoder-decoder paring in brief
 <p align="center"><img src="../images/transformer/fig_01.png" alt="original paper figure 1" width="400"/></p>
@@ -45,9 +47,10 @@
 <p align="center"><img src="../images/transformer/positional_encoding.png" alt="original paper formula" width="300"/></p>
 
 - sinusoidal functions are used to inject the sequence order information to help the model learn to attend by relative positions
+- the wavelengths form a geometric progression from 2π to 10000 · 2π
 - any position with some fixed offset k, PE_(pos+k), can be represented as a linear function of PE_pos
 
-## why self-attention
+## Why Self-Attention
 <p align="center"><img src="../images/transformer/tbl_01.png" alt="original paper table 1" width="800"/></p>
 
 - complexity per layer
@@ -59,7 +62,8 @@
 - maximum path length
   - a single self-attention layer simply connects all positions to each other which no other layer type can do
 
-## training 
+## Training 
+
 - training data and batching
   - WMT 2014 English-German
     - 4.5 million sentence pairs
@@ -92,5 +96,26 @@
   - label smoothing
     - epsilon = 0.1
     - performance: better for accuracy and BLUE while worse for perplexity
-## results
-- refer to the original paper
+
+## Results
+
+### machine translation
+
+<p align="center"><img src="../images/transformer/tbl_02.png" alt="original paper table 2" width="800"/></p>
+
+### model variations
+
+<p align="center"><img src="../images/transformer/tbl_03.png" alt="original paper table 3" width="800"/></p>
+
+### english constituency parsing
+
+<p align="center"><img src="../images/transformer/tbl_04.png" alt="original paper table 4" width="800"/></p>
+
+## Attention Visualizations
+
+<p align="center"><img src="../images/transformer/fig_03.png" alt="original paper figure 3" width="800"/></p>
+
+<p align="center"><img src="../images/transformer/fig_04.png" alt="original paper figure 4" width="800"/></p>
+
+<p align="center"><img src="../images/transformer/fig_05.png" alt="original paper figure 5" width="800"/></p>
+
