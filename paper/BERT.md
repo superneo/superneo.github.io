@@ -41,22 +41,35 @@
 <p align="center"><img src="../images/BERT/BERT_1.png" alt="BERT - pre-training and fine-tuning" width="1200"/></p>
 
 - Model Architecture
-  - TBD
+  - simply the [multi-layer bidirectional transformer encoder](http://nlp.seas.harvard.edu/2018/04/03/attention.html)
+  - BERT_BASE (L=12, H=768, A=12, Total Param- eters=110M) and BERT_LARGE (L=24, H=1024, A=16, Total Parameters=340M)
+  - BERT_BASE set to have the same model size as GPT1
 - Input/Output Representations
-  - TBD
+  - with wordpiece embedding, sentence as an arbitrary span of contiguous text and sequence as 1 or 2 sentences packed together
+  - \[CLS\] + sentence1 + \[SEP\] + sentence2 + \[SEP\]
+  - an input token = token embedding + segment embedding + position embedding
 
 <p align="center"><img src="../images/BERT/BERT_2.png" alt="BERT - input representation" width="1200"/></p>
 
 ### pre-training BERT
 - Task #1: Masked LM
-  - TBD
+  - train the model to predict 15% of randomly masked wordpiece tokens in the input sequence
+  - actually replace the i-th token with following to mitigate the difference between training and inference:
+    - (1) the \[MASK\] token 80% of the time
+    - (2) a random token 10% of the time
+    - (3) the unchanged i-th token 10% of the time
 - Task #2: Next Sentence Prediction (NSP)
-  - TBD
+  - 50% true order of 2 sentences(IsNext) and 50% false(NotNext)
+  - reported to help improve performance on tasks like QA and NLI
 - Pre-training data
-  - TBD
+  - the pre-training procedure is the same as ordinary existing LM pre-training
+  - BooksCorpus(800M words) + English Wikipedia(2500M words/text passages only for long context)
 
 ### Fine-tuning BERT
-- TBD
+- BERT can handle different downstream tasks simply by concatenating 2 sentences and applying bidirectional cross attention
+- pre-training and fine-tuning input/output sequences actually share the same structure
+- all fine-tuning tasks are relatively cheaper with the same pre-trained model
+  - all of the results in the paper can be replicated in at most 1 hour on a single cloud TPU/a few hours on a GPU
 
 - Illustrations of Fine-tuning on Different Tasks
 
