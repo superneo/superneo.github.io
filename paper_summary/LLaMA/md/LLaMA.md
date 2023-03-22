@@ -62,51 +62,61 @@
   - training dataset of 1.4T tokens after tokenization
   - mostly each token is used only once during training, except for Wikipedia and Books domains(with about 2 epochs)
 ### Architecture
-- TBD (table 2)
-  - Pre-normalization [GPT3]
-    - TBD
-  - SwiGLU activation function [PaLM]
-    - TBD
-  - Rotary Embeddings [GPTNeo]
-    - TBD
+  - based on transformer with following differences inspired from LLMs in bracket:
+    - Pre-normalization [GPT3]
+      - transformer sub-layer input, instead of output, normalization using RMSNorm for training stability
+    - SwiGLU activation function [PaLM]
+      - SwiGLU instead of ReLU non-linearity
+    - Rotary Embeddings [GPTNeo]
+      - rotary positional embeddings, instead of absolute positional embeddings, at each layer of the network
+
+<p align="center"><img src="../images/LLaMA_tbl_02.png" alt="Pre-training data" width="800"/></p>
+
 ### Optimizer
-- TBD
+  - AdamW optimizer with $\beta$<sub>1</sub> = 0.9 and $\beta$<sub>2</sub> = 0.95
+  - cosine learning rate schedule with the final learning rate equal to 10% of max learning rate
+  - weight decay = 0.1, gradient clipping = 1.0, warmup steps = 2000
+  - vary the learning rate and batch size with the size of the model (table 2)
 ### Efficient implementation
-- TBD
+  - causal multi-head attention improvement(to skip computation over the masked region) to reduce memory usage and runtime
+  - save only expensive activations to compute using manual implementation of the backward function, not pytorch autograd
+    - model/sequence parallemism
+    - computation overlap of activations and the communication between GPUs over the network as much as possible
+  - LLaMA-65B training on 1.4T tokens takes about 21 days with 2048 A100 80GB, processing around 380 tokens/sec/GPU
 
 ## Main results
-- TBD
+  - TBD
 ### Common Sense Reasoning
-- TBD (table 3)
+  - TBD (table 3)
 ### Closed-book Question Answering
-- TBD (table 4 & 5)
+  - TBD (table 4 & 5)
 ### Reading Comprehension
-- TBD (table 6)
+  - TBD (table 6)
 ### Mathematical reasoning
-- TBD (table 7)
+  - TBD (table 7)
 ### Code generation
-- TBD (table 8)
+  - TBD (table 8)
 ### Massive Multitask Language Understanding
-- TBD (table 9)
+  - TBD (table 9)
 ### Evolution of performance during training
-- TBD (figure 1 & 2)
+  - TBD (figure 1 & 2)
 
 ## Instruction Finetuning
-- TBD (table 10)
+  - TBD (table 10)
 
 ## Bias, Toxicity and Misinformation
-- TBD
+  - TBD
 ### RealToxicityPrompts
-- TBD (table 11)
+  - TBD (table 11)
 ### CrowS-Pairs
-- TBD (table 12)
+  - TBD (table 12)
 ### WinoGender
-- TBD (table 13)
+  - TBD (table 13)
 ### TruthfulQA
-- TBD (table 14)
+  - TBD (table 14)
 
 ## Carbon footprint
-- TBD (table 15)
+  - TBD (table 15)
 
 ## Related work
   - Language models
@@ -117,4 +127,4 @@
     - TBD
 
 ## Conclusion
-- TBD
+  - TBD
