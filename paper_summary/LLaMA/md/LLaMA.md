@@ -1,37 +1,66 @@
 # Paper Summary: [LLaMA: Open and Efficient Foundation Language Models](https://arxiv.org/pdf/2302.13971.pdf)
 
 ## Abstract
-- TBD
+  - LLaMA: a collection of foundation LMs (7B/13B/33B/65B)
+  - trained on trillions of tokens from publicly available datasets only
+  - benchmarks performance: LLaMA-13B > GPT3-175B, LLaMA-65B > Chinchilla-70B & PaLM-540B
+  - https://github.com/facebookresearch/llama
 
 ## Introduction
-- TBD
+  - smaller models trained on more data > lager models trained on less
+    - LLMs based on the assumption that more parameters will lead to better performance: GPT3-175B/PaLM-540B/Gopher-280B/etc.
+    - but best performances are achieved by smaller models trained on more data: Chinchilla-70B
+    - while Chinchilla focuses on the training budget, the inference budget really matters when serving at scale
+    - so not the fastest to train but the fastest at inference for a given target level of performance
+  - LLaMA focues on:
+    - the best possible performance for limited inference budget
+      - LLaMA-13B > GPT-3 on most benchmarks though being 13X smaller
+      - LLaMA-65B ~= Chinchilla or PaLM-540B
+    - publicly available open-source-compatible data
+      - most existing LLMs rely on not publicly available or undocumented data
+      - while some exceptions(OPT/GPT-NeoX/BLOOM/GLM) exist but they perform worse than PaLM-62B/Chinchilla
+  - what follows:
+    - transformer architecure modifications
+    - training method
+    - performance of LLaMAs vs other LLMs
+    - biases/toxicity in LLaMA
 
 ## Approach
   - similar approach for GPT3/PaLM
   - inspired by the Chinchilla scaling laws
   - large transformers trained on large corpora with standard optimizer
 ### Pre-training Data
-- publicly available & open-source-compatible data only
-- reuse data sources leveraged for existing LLMs
+  - publicly available & open-source-compatible data only
+  - reuse data sources leveraged for existing LLMs
 
 <p align="center"><img src="../images/LLaMA_tbl_01.png" alt="Pre-training data" width="400"/></p>
 
   - English CommonCrawl [67%]
-    - TBD
+    - line-level-deduplication + language ID/n-gram LM for non-English/low-quality corpus removal
+    - use a linear classifier for Wikipedia reference pages only
   - C4 [15%]
-    - TBD
+    - a large, cleaned version of Common Crawl's web crawl corpus(publicly available & diverse)
+    - deduplication + language ID + heuristics(punctuation marks/number of words and sentences/etc.)
   - Github [4.5%]
-    - TBD
+    - Google BigQuery GitHub projects under Apache/BSD/MIT licenses
+    - heuristics + boilerplate removal + file-level-deduplication
   - Wikipedia [4.5%]
-    - TBD
+    - dumps from June~August 2022 of 20 languages using Latin/Cyrillic scripts
+    - removal of hyperlinks/comments/boilerplates
   - Gutenberg and Books3 [4.5%]
-    - TBD
+    - Gutenberg Project for books in the public domain and Books3 section of ThePile(publicly available corpus)
+    - book-level-deduplication for 90+% content overlap books
   - ArXiv [2.5%]
-    - TBD
+    - for scientific data in Latex files
+    - removal of the first section/bibliography/comments and inline-expansion
   - Stack Exchange [2%]
-    - TBD
+    - a high quality QA data dump ranging from computer science to chemistry
+    - data from 28 largest websites + removal of HTML tags + sorting of answers by score
   - Tokenizer
-    - TBD
+    - BPE implementation of Sentence-Piece
+    - splitting all numbers into individual digits + fallback to bytes to decompose unknown UTF-8 characters
+  - training dataset of 1.4T tokens after tokenization
+  - mostly each token is used only once during training, except for Wikipedia and Books domains(with about 2 epochs)
 ### Architecture
 - TBD (table 2)
   - Pre-normalization [GPT3]
