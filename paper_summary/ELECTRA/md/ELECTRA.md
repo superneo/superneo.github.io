@@ -19,7 +19,7 @@
     - it doesn't suffer from the pre-training/fine-tuning discrepancy for the [MASK] token just as BERT does
     - then pre-train the network as a discriminator that predicts for every token if it's original or replaced
     - it's more computationally efficient than MLM to learn from all input tokens, not just a small subset
-    - and the generator corrputing tokens is trained with MLE(maximum likelihood estimation), not adversarially(GAN)
+    - and the generator corrputing tokens is trained with maximum likelihood, not adversarially as for GAN
   - they call the approach ELECTRA: Efficiently Learning an Encoder that Classifies Token Replacements Accurately
     - it's shown to train much faster than BERT and achieve higher accuracy on downstream tasks when fully trained
   - they train ELECTRA models of various sizes and evaluate their downstream performance vs their compute requirement
@@ -40,12 +40,36 @@
   - both map an input token seq **x** = [x<sub>1</sub>,...,x<sub>n</sub>] into a context vector reps seq h(**x**) = [h<sub>1</sub>,...,h<sub>n</sub>]
   - for x<sub>t</sub> = [MASK], G outputs a probability for generating a particular token x<sub>t</sub> with a softmax layer:
 
-<p align="center"><img src="../images/ELECTRA_exp_01.png" alt="ELECTRA architecture" width="600"/></p>
+<p align="center"><img src="../images/ELECTRA_exp_01.png" alt="generator softmax probability" width="600"/></p>
 
   - 'e' denotes token embeddings
   - for a position 't', D predicts if the token x<sub>t</sub> is original or replaced with a sigmoid output layer:
 
-<p align="center"><img src="../images/ELECTRA_exp_02.png" alt="ELECTRA architecture" width="300"/></p>
+<p align="center"><img src="../images/ELECTRA_exp_02.png" alt="discriminator sigmoid" width="300"/></p>
+
+  - G is trained to perform masked language modeling (MLM)
+  - D is trained to distinguish tokens in the data from tokens replaced by generator samples
+  - model inputs are constructed according to:
+
+<p align="center"><img src="../images/ELECTRA_exp_03.png" alt="model input construction" width="700"/></p>
+
+  - and the loss functions:
+
+<p align="center"><img src="../images/ELECTRA_exp_04.png" alt="loss functions" width="800"/></p>
+
+  - although similar to the GAN training objective, there are several key differences:
+    - if G generates the correct token, that token is considered 'real' instead of 'fake'
+    - G is trained with maximum likelihood rather than being trained adversarially to fool D
+      - applying GAN to text is hard as it's impossible to back-propagate through sampling from G
+      - detouring this with reinforcement learning to train G performed worse than maximum-likelihood training
+    - G doesn't get a noise vector as input which is typical for a GAN
+  - so we minimize the combined loss over a large corpus X of raw text:
+    - approximate the expectations in the losses with a single sample
+    - don’t back-propagate the D loss through G(impossible due to the G sampling step)
+
+<p align="center"><img src="../images/ELECTRA_exp_05.png" alt="combined loss" width="350"/></p>
+
+  - after pre-training, we throw out G and fine-tune D on downstream tasks
 
 ## Experiments
 ### Experimental Setup
