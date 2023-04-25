@@ -1,12 +1,34 @@
 # Paper Summary: [ELECTRA: PRE-TRAINING TEXT ENCODERS AS DISCRIMINATORS RATHER THAN GENERATORS](https://arxiv.org/pdf/2003.10555.pdf)
-- [github repo(google-research/electra)](https://github.com/google-research/electra)
-- [Google Research blog post(More Efficient NLP Model Pre-training with ELECTRA)](https://ai.googleblog.com/2020/03/more-efficient-nlp-model-pre-training.html)
+  - [github repo(google-research/electra)](https://github.com/google-research/electra)
+  - [Google Research blog post(More Efficient NLP Model Pre-training with ELECTRA)](https://ai.googleblog.com/2020/03/more-efficient-nlp-model-pre-training.html)
 
 ## Abstract
-  - TBD
+  - BERT MLM produces good results for downstream NLP tasks but quite expensive
+  - replaced token detection(RTD) as an alternative for better sample/compute-efficiency
+  - RTD replaces some input tokens with plausible alternatives sampled from a small generator
+  - then train a discriminator to predict whether each input token was replaced or original
+  - RTD, using all input tokens, is proven experimentally to be more efficient than MLM
+  - RTD learns better contextual representations than BERT given the same model size/data/compute
+  - a small ELECTRA model trained on 1 GPU for 4 days defeats GPT(using 30x more compute) on the GLUE benchmark
+  - comparable performance with < 1/4 of compute for RoBERTa/XLNet and better with the same amount of compute
 
 ## Introduction
-  - TBD
+  - MLM exceled predecessors using bidirectional context but incurred huge compute cost(ex. 15% input masking)
+  - RTD is an alternative pre-training task to train a model to distinguish real input tokens from replaced ones
+    - it corrupts the input by replacing some tokens with samples from a proposal distribution like small MLM output
+    - it doesn't suffer from the pre-training/fine-tuning discrepancy for the [MASK] token just as BERT does
+    - then pre-train the network as a discriminator that predicts for every token if it's original or replaced
+    - it's more computationally efficient than MLM to learn from all input tokens, not just a small subset
+    - and the generator corrputing tokens is trained with MLE(maximum likelihood estimation), not adversarially(GAN)
+  - they call the approach ELECTRA: Efficiently Learning an Encoder that Classifies Token Replacements Accurately
+    - it's shown to train much faster than BERT and achieve higher accuracy on downstream tasks when fully trained
+  - they train ELECTRA models of various sizes and evaluate their downstream performance vs their compute requirement
+    - experiments on the GLUE benchmark and SQuAD question answering benchmark
+    - ELECTRA outperforms MLM-based BERT/XLNet given the same model size/data/compute(Figure 1)
+    - ELECTRA-Small, trained on 1 GPU in 4 days, beats a small BERT by 5 GLUE points and a much larger GPT model
+    - ELECTRA-Large, with fewer params and 1/4 of training compute, matches RoBERTa/XLNet comparably
+    - training ELECTRA-Large further even defeats ALBERT on GLUE and sets a new SOTA for SQuAD 2.0
+  - in total, RTD is more compute/param-efficient than MLM-based methods for language representation learning
 
 <p align="center"><img src="../images/ELECTRA_fig_01.png" alt="RTD vs MLM" width="800"/></p>
 
@@ -49,7 +71,7 @@
 ## Related Work
 ### Self-Supervised Pre-training for NLP
   - for word representations
-    - Word2Vec, Glove, etc.
+    - Word2Vec, GloVe, etc.
   - and language modeling
     - BERT/MASS/UniLM/ERNIE/SpanBERT/XLNet/TinyBERT/MobileBERT/etc.
 ### Generative Adversarial Networks
@@ -68,7 +90,7 @@
   - RTD as a self-supervised task for language representation learning
   - to train a text encoder to distinguish original input tokens from negative samples
   - RTD is more data/downstream-task efficient than MLM
-  - writers hope ELECTRA will make pre-training large models more accessible
+  - the writers hope ELECTRA will make pre-training large models more accessible
   - NLP pre-training needs to focus on compute-efficiency as well as absolute performance
 
 --------------------------------------------------------------------------------------------
