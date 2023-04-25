@@ -36,7 +36,16 @@
 
 <p align="center"><img src="../images/ELECTRA_fig_02.png" alt="ELECTRA architecture" width="800"/></p>
 
-  - TBD
+  - ELECTRA approach trains 2 transformer encoder stacks: G(generator) and D(discriminator)
+  - both map an input token seq **x** = [x<sub>1</sub>,...,x<sub>n</sub>] into a context vector reps seq h(**x**) = [h<sub>1</sub>,...,h<sub>n</sub>]
+  - for x<sub>t</sub> = [MASK], G outputs a probability for generating a particular token x<sub>t</sub> with a softmax layer:
+
+<p align="center"><img src="../images/ELECTRA_exp_01.png" alt="ELECTRA architecture" width="600"/></p>
+
+  - 'e' denotes token embeddings
+  - for a position 't', D predicts if the token x<sub>t</sub> is original or replaced with a sigmoid output layer:
+
+<p align="center"><img src="../images/ELECTRA_exp_02.png" alt="ELECTRA architecture" width="300"/></p>
 
 ## Experiments
 ### Experimental Setup
