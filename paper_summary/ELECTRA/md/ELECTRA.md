@@ -73,7 +73,18 @@
 
 ## Experiments
 ### Experimental Setup
-  - TBD
+  - evaluate on the GLUE benchmark and SQuAD dataset
+    - GLUE: RTE, MNLI, QNLU, MRPC, QQP, STS, SST, CoLA
+    - SQuAD: text span selection for question answering(SQuAD 1.1) + unanswerability beyond 1.1(SQuAD 2.0)
+    - evaluation metrics: Spearman correlation/Mathews correlation/accuracy for GLUE, Exact Match/F1 for SQuAD
+  - pre-train on the same data as BERT for most experiments consisting of 3.3B tokens from Wikipedia + BooksCorpus
+    - for ELECTRA-Large pre-train on XLNet data extending the BERT dataset to 33B tokens(ClueWeb/CommonCrawl/Gigaword)
+  - the same model architecture and most hyper-params as BERT's
+    - simple linear classifiers on top of ELECTRA for fine-tuning on GLUE
+    - question-answering module from XLNet on top of ELECTRA from SQuAD 1.1 & 2.0('answerability' classifier added)
+  - some evaluation datasets are small enough to incur substantial variance by the random seed
+    - report the median of 10 fine-tuning runs from the same pre-trained checkpoint for each result
+    - results are on the dev set by default
 ### Model Extensions
 #### Weight Sharing
   - TBD
