@@ -47,8 +47,8 @@
 
 <p align="center"><img src="../images/ELECTRA_exp_02.png" alt="discriminator sigmoid" width="300"/></p>
 
-  - G is trained to perform masked language modeling (MLM)
-  - D is trained to distinguish tokens in the data from tokens replaced by generator samples
+  - G is trained to perform masked language modeling(MLM)
+  - D is trained to distinguish tokens in the data from tokens replaced by G samples
   - model inputs are constructed according to:
 
 <p align="center"><img src="../images/ELECTRA_exp_03.png" alt="model input construction" width="700"/></p>
@@ -86,31 +86,89 @@
     - report the median of 10 fine-tuning runs from the same pre-trained checkpoint for each result
     - results are on the dev set by default
 ### Model Extensions
+  - experiments use the same model size and training data as BERT-Base by default
 #### Weight Sharing
-  - TBD
+  - weight tying experiments with 500k steps for pre-training efficiency when G and D have the same size:
+    - no weight tying: 83.6 GLUE points, token-embeddings tying: 84.3, all-weights tying: 84.4
+    - tied token embeddings enable efficient representation learning with G's softmax over all vocab for each step
+    - but tying all weights shows little improvement while requiring G and D to be the same size with almost no gain
+  - so they use tied embeddings only for further experiments in the paper
+#### Smaller Generators
+  - G and D of different sizes are shown in Figure 3(with all models trained for 500k steps)
+  - smaller Gs require less compute per step but models work best with Gs 1/4~1/2 the size of D
+  - it seems like a too strong G may pose a too-challenging task that prevents D from learning effectively
+  - further experiments in this paper use the best G size found for the given D size
 
 <p align="center"><img src="../images/ELECTRA_fig_03.png" alt="generator size and training methods" width="800"/></p>
 
-#### Smaller Generators
-  - TBD
 #### Training Algorithms
-  - TBD
+  - they explore training methods other than the proposed joint training
+  - (A) 2-stage training
+    - procedure(provided both G and D have the same size)
+      - step 1: train only G with L<sub>MLM</sub> for n steps
+      - step 2: initialize the D weights with G's; then train D with L<sub>Disc</sub> for n steps, keeping G frozen
+    - without the weight initialization, D sometimes fails to learn at all beyond the majority class
+    - it eventually fails to outperform the joint training which helps D to catch up the progress of G
+  - (B) adversarial training
+    - train G adversarially as in a GAN using RL to walk around the G sampling step issue
+    - it outperforms BERT but fails to defeat the MLE methods in the end for these adversarial training problems:
+      - 1: the adversarial G is simply worse at MLM; only 58% accuracy while 65% for an MLE-trained G
+      - 2: the adversarial G produces a low-entropy output distribution with most of the probability mass on 1 token
 ### Small Models
-  - TBD
+
+<p align="center"><img src="../images/ELECTRA_tbl_01.png" alt="comparison of small models" width="800"/></p>
+
+  - they develop a small model(for 1M steps), trainable on 1 GPU, to improve pre-training efficiency
+  - reduce the model size starting from BERT-base hyper-params:
+    - seq. len(512->128), batch size(256->128), hidden dimension(768->256), token embeddings(768->128)
+  - vs BERT-Small for fair comparison(with the same hyper-params, trained for 1.5M steps)
+  - vs ELMo and GPT(for comparison with other resource-efficient models)
+  - ELECTRA-Base vs BERT-Base
+  - stronger small-sized and base-sized models trained with more compute
+
+<p align="center"><img src="../images/ELECTRA_tbl_08.png" alt="results for stronger models" width="800"/></p>
+
 ### Large Models
-  - TBD
+  - they train big ELECTRA models to measure the effectiveness of RTD pre-training @ 2020 SOTA txfmr scales
+  - ELECTRA-Large models are the same size as BERT-Large but are trained for much longer
+  - batch size 2048 and the XLNet pre-training data
+  - ELECTRA-400K performs comparably to RoBERTa/XLNet with less than 1/4 pre-training compute
+  - training ELECTRA for longer(ELECTRA-1.75M) results in a model beating them on most GLUE tasks with less compute
+
+<p align="center"><img src="../images/ELECTRA_tbl_02.png" alt="comparison of large models on the GLUE dev set" width="800"/></p>
+
+<p align="center"><img src="../images/ELECTRA_tbl_03.png" alt="GLUE test-set results for large models" width="800"/></p>
+
+  - ELECTRA scores better than MLM-based methods given the same compute resource
+
+<p align="center"><img src="../images/ELECTRA_tbl_04.png" alt="Results on the SQuAD for non-ensemble models" width="800"/></p>
+
 ### Efficiency Analysis
-  - TBD
+  - design experiments(between BERT and ELECTRA) to better understand where the gains of ELECTRA come from
 #### ELECTRA 15%
-  - TBD
+  - the D loss only comes from 15% of the tokens masked out of the input
 #### Replace MLM
-  - TBD
+  - the same objective as MLM except for the [MASK] tokens replaced with G samples
+  - to test to what extent ELECTRA's gains come from solving the pre-training/fine-tuning discrepancy for [MASK]
 #### All-Tokens MLM
-  - TBD
+  - do the same as 'Replace MLM' but over all input tokens
+  - it improves the result to train this model with an explicit copy mechanism
+    - a copy probability D for each token using a sigmoid layer
+    - model output: D(**ELECTRA**) * (input token) + (1 - D)(**ELECTRA**) * (MLM softmax(**BERT**))
+    - if without G sample replacement, the model would trivially learn MLM for [MASK] and copy the input otherwise
 
 <p align="center"><img src="../images/ELECTRA_tbl_05.png" alt="compute-efficiency experiments" width="800"/></p>
 
+  - these results suggest a large amount of ELECTRA’s improvement can be attributed to learning from all tokens
+  - and a smaller amount can be attributed to alleviating the pre-train fine-tune mismatch
+
 <p align="center"><img src="../images/ELECTRA_fig_04.png" alt="ELECTRA vs BERT for different sizes" width="800"/></p>
+
+  - the gains from ELECTRA grow larger as the models get smaller
+  - ELECTRA achieves higher downstream accuracy than BERT when fully trained
+    - they argue ELECTRA to be more parameter-efficient than BERT
+    - because it doesn't have to model the full distribution of possible tokens at each position
+    - **more analysis is needed to completely explain ELECTRA's parameter efficiency(they don't know, either).**
 
 ## Related Work
 ### Self-Supervised Pre-training for NLP
@@ -150,4 +208,7 @@
     - and λ out of [1, 10, 20, 50, 100] in early experiments
 
 ## Fine-Tuning Details
-  - TBD
+
+<p align="center"><img src="../images/ELECTRA_tbl_06.png" alt="Pre-train hyperparameters" width="800"/></p>
+
+<p align="center"><img src="../images/ELECTRA_tbl_07.png" alt="Fine-tune hyperparameters" width="700"/></p>
